@@ -1,0 +1,9 @@
+1. Descomprime el ZIP en la app Archivos.
+2. En GitHub elimina el ZIP anterior del repositorio.
+3. Sube index.html a la raíz del repositorio.
+4. En GitHub entra a Settings > Pages.
+5. Elige Deploy from a branch > main > /(root) > Save.
+6. Espera a que aparezca la liga HTTPS.
+7. Ábrela en Safari y toca Compartir > Agregar a pantalla de inicio.
+
+Candelario y Ruth crean cuentas con correos distintos. En Ajustes aparece el código familiar.
