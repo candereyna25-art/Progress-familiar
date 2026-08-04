@@ -1,0 +1,19 @@
+WEIGHT TRACKER 2.0
+
+Estructura profesional:
+css/styles.css
+js/config.js
+js/health.js
+js/charts.js
+js/coach.js
+js/main.js
+
+CÓMO SUBIR
+1. Descomprime el ZIP.
+2. En GitHub sube la carpeta css, la carpeta js y los archivos de raíz.
+3. Reemplaza index.html, manifest.webmanifest y sw.js.
+4. Commit changes.
+5. Abre:
+https://candereyna25-art.github.io/Progress-familiar/?v=20
+
+No requiere SQL adicional y conserva los datos existentes.
