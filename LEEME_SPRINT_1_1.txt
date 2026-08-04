@@ -1,0 +1,11 @@
+WEIGHT TRACKER — SPRINT 1.1
+
+Incluye:
+- Hora automática visible en historial.
+- Health Score.
+- Calendario mensual.
+- Coach básico.
+- Registro de dieta cumplida.
+- Tendencia de peso.
+
+Sube todos los archivos a GitHub y reemplaza los existentes. No requiere SQL adicional.
