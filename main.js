@@ -4,7 +4,7 @@ import {drawChart} from './charts.js';
 import {coachText} from './coach.js';
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=x=>document.getElementById(x);
-let session=null,p=null,rows=[],chart='weight';
+let session=null,p=null,rows=[],chart='weight',editingId=null;
 const val=x=>$(x).value===''?null:Number($(x).value),msg=(id,t,e=0)=>$(id).innerHTML=t?'<div class="status '+(e?'error':'')+'">'+t+'</div>':'';
 
 function nearestBefore(days){if(!rows.length)return null;const target=new Date(rows.at(-1).entry_date);target.setDate(target.getDate()-days);let best=null;for(const r of rows){if(new Date(r.entry_date)<=target)best=r}return best}
@@ -27,9 +27,59 @@ function renderMilestones(weight){$('milestones').innerHTML=[125,120,115,110,105
 function renderCalculated(first,last){const lost=Number(first.weight_kg)-Number(last.weight_kg),pct=lost/Number(first.weight_kg)*100,best=Math.min(...rows.map(r=>Number(r.weight_kg))),avg=rows.slice(-7).reduce((a,r)=>a+Number(r.weight_kg),0)/Math.min(7,rows.length);const item=(a,b)=>'<div class="calc-item"><span>'+a+'</span><strong>'+b+'</strong></div>';$('calculated').innerHTML=item('Pérdida total',(lost>=0?'-':'+')+Math.abs(lost).toFixed(2)+' kg')+item('% peso inicial',(pct>=0?'-':'+')+Math.abs(pct).toFixed(1)+'%')+item('Mejor peso',best.toFixed(2)+' kg')+item('Promedio reciente',avg.toFixed(2)+' kg')+item('Distancia a mejor',(Number(last.weight_kg)-best).toFixed(2)+' kg')+item('Registros',rows.length)}
 function ind(name,state,trend){return '<div class="indicator"><b>'+name+'</b><span class="state '+state+'">'+(state==='good'?'● Bien':state==='warn'?'● Atención':'● Crítico')+'</span><span>'+trend+'</span></div>'}
 function renderEngineering(e,prev){const w=prev?(e.weight_kg<prev.weight_kg?'↓':e.weight_kg>prev.weight_kg?'↑':'→'):'—';$('engineering').innerHTML=ind('Peso',w==='↓'?'good':w==='↑'?'warn':'good',w)+ind('Agua',e.water_liters>=2.5?'good':'warn',(e.water_liters||0)+' L')+ind('Sueño',e.sleep_hours>=7?'good':'bad',(e.sleep_hours||0)+' h')+ind('Ansiedad',e.anxiety_score<=5?'good':e.anxiety_score<=7?'warn':'bad',(e.anxiety_score??'—')+'/10')+ind('Actividad',(e.exercise_minutes||0)>=20?'good':'warn',(e.exercise_minutes||0)+' min')}
-function renderList(){$('list').innerHTML=[...rows].reverse().map(r=>'<div class="entry"><b>'+Number(r.weight_kg).toFixed(2)+' kg</b><small>'+r.entry_date+' · '+new Date(r.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})+'</small><small>'+((r.notes||'').replace('[DIETA_OK]',''))+'</small><button class="danger" onclick="window.del(\''+r.id+'\')">Eliminar</button></div>').join('')}
+function filteredHistory(){
+ const filter=$('historyFilter')?.value||'all', now=new Date();
+ if(filter==='all')return [...rows].reverse();
+ if(filter==='measurements')return [...rows].reverse().filter(r=>r.waist_cm!=null||r.chest_cm!=null||r.hip_cm!=null||r.arm_cm!=null||r.thigh_cm!=null);
+ const days=Number(filter), limit=new Date(now);limit.setDate(limit.getDate()-days);
+ return [...rows].reverse().filter(r=>new Date(r.entry_date+'T12:00:00')>=limit);
+}
+function renderList(){
+ const data=filteredHistory();
+ $('historySummary').textContent=data.length+' de '+rows.length+' registros mostrados';
+ $('list').innerHTML=data.length?data.map(r=>{
+   const clean=(r.notes||'').replace('[DIETA_OK]','').trim();
+   const details=[
+     r.waist_cm!=null?'Cintura '+r.waist_cm+' cm':'',
+     r.water_liters!=null?'Agua '+r.water_liters+' L':'',
+     r.sleep_hours!=null?'Sueño '+r.sleep_hours+' h':'',
+     r.anxiety_score!=null?'Ansiedad '+r.anxiety_score+'/10':'',
+     r.had_chips===false?'Sin papitas':r.had_chips===true?'Papitas: sí':''
+   ].filter(Boolean).map(x=>'<span class="chip">'+x+'</span>').join('');
+   return '<div class="entry"><div class="entry-main"><b>'+Number(r.weight_kg).toFixed(2)+' kg</b><small class="entry-meta">'+r.entry_date+' · '+new Date(r.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})+'</small>'+(clean?'<small>'+clean+'</small>':'')+'</div><div class="entry-actions"><button class="edit" onclick="window.editEntry(\''+r.id+'\')">Editar</button><button class="delete" onclick="window.del(\''+r.id+'\')">Eliminar</button></div>'+(details?'<div class="entry-details">'+details+'</div>':'')+'</div>';
+ }).join(''):'<div class="muted">No hay registros para este filtro.</div>';
+}
+window.editEntry=id=>{
+ const r=rows.find(x=>x.id===id);if(!r)return;
+ editingId=id;
+ $('date').value=r.entry_date;$('w').value=r.weight_kg??'';$('water').value=r.water_liters??'';$('sleep').value=r.sleep_hours??'';$('hunger').value=r.hunger_score??'';$('anxiety').value=r.anxiety_score??'';$('walks').value=r.walking_days??'';$('exercise').value=r.exercise_minutes??'';$('chips').value=r.had_chips===null?'':String(r.had_chips);$('diet').value=(r.notes||'').includes('[DIETA_OK]')?'true':'';
+ $('waist').value=r.waist_cm??'';$('chest').value=r.chest_cm??'';$('hip').value=r.hip_cm??'';$('arm').value=r.arm_cm??'';$('thigh').value=r.thigh_cm??'';$('notes').value=(r.notes||'').replace('[DIETA_OK]','').trim();
+ $('submitBtn').textContent='Actualizar registro';$('cancelEditBtn').classList.remove('hidden');
+ document.querySelectorAll('nav button').forEach(q=>q.classList.toggle('on',q.dataset.screen==='register'));
+ document.querySelectorAll('.screen').forEach(q=>q.classList.toggle('on',q.id==='register'));
+ $('saveMsg').innerHTML='<div class="editing-banner">Editando el registro del '+r.entry_date+'</div>';
+ window.scrollTo({top:0,behavior:'smooth'});
+};
+function cancelEdit(){
+ editingId=null;$('form').reset();$('date').value=new Date().toISOString().slice(0,10);
+ $('submitBtn').textContent='Guardar';$('cancelEditBtn').classList.add('hidden');$('saveMsg').innerHTML='';
+}
 window.del=async id=>{if(confirm('¿Eliminar?')){await sb.from('progress_entries').delete().eq('id',id);await load()}};
 $('login').onclick=async()=>{let {error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('pass').value});msg('authMsg',error?.message||'',!!error)};$('signup').onclick=async()=>{let {error}=await sb.auth.signUp({email:$('email').value,password:$('pass').value,options:{data:{full_name:$('email').value.split('@')[0]}}});msg('authMsg',error?error.message:'Cuenta creada. Revisa tu correo.',!!error)};$('logout').onclick=()=>sb.auth.signOut();
-$('form').onsubmit=async e=>{e.preventDefault();let notes=($('diet').value==='true'?'[DIETA_OK] ':'')+$('notes').value;let row={user_id:session.user.id,entry_date:$('date').value,weight_kg:val('w'),water_liters:val('water'),sleep_hours:val('sleep'),hunger_score:val('hunger'),anxiety_score:val('anxiety'),walking_days:val('walks'),exercise_minutes:val('exercise'),had_chips:$('chips').value===''?null:$('chips').value==='true',waist_cm:val('waist'),chest_cm:val('chest'),hip_cm:val('hip'),arm_cm:val('arm'),thigh_cm:val('thigh'),notes:notes||null};let {error}=await sb.from('progress_entries').upsert(row,{onConflict:'user_id,entry_date'});msg('saveMsg',error?error.message:'Guardado',!!error);if(!error){e.target.reset();$('date').value=new Date().toISOString().slice(0,10);await load()}};
+$('form').onsubmit=async e=>{
+ e.preventDefault();
+ let notes=($('diet').value==='true'?'[DIETA_OK] ':'')+$('notes').value;
+ let row={user_id:session.user.id,entry_date:$('date').value,weight_kg:val('w'),water_liters:val('water'),sleep_hours:val('sleep'),hunger_score:val('hunger'),anxiety_score:val('anxiety'),walking_days:val('walks'),exercise_minutes:val('exercise'),had_chips:$('chips').value===''?null:$('chips').value==='true',waist_cm:val('waist'),chest_cm:val('chest'),hip_cm:val('hip'),arm_cm:val('arm'),thigh_cm:val('thigh'),notes:notes||null,updated_at:new Date().toISOString()};
+ let error;
+ if(editingId){
+   ({error}=await sb.from('progress_entries').update(row).eq('id',editingId));
+ }else{
+   ({error}=await sb.from('progress_entries').upsert(row,{onConflict:'user_id,entry_date'}));
+ }
+ msg('saveMsg',error?error.message:(editingId?'Registro actualizado':'Guardado'),!!error);
+ if(!error){cancelEdit();await load()}
+};
+$('cancelEditBtn').onclick=cancelEdit;
+$('historyFilter').onchange=renderList;
 $('saveProfile').onclick=async()=>{let {error}=await sb.from('profiles').update({full_name:$('name').value,height_cm:val('height'),intermediate_goal_kg:val('mid'),final_goal_kg:val('final')}).eq('id',session.user.id);msg('profileMsg',error?error.message:'Perfil actualizado',!!error);if(!error)await load()};$('join').onclick=async()=>{let {error}=await sb.rpc('join_family_by_code',{supplied_code:$('joinCode').value});msg('familyMsg',error?error.message:'Unido',!!error)};
 $('theme').onclick=()=>{document.body.classList.toggle('dark');localStorage.theme=document.body.classList.contains('dark')?'dark':'light'};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(q=>q.classList.remove('on'));b.classList.add('on');chart=b.dataset.chart;drawChart($('chart'),rows,chart)});document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(q=>q.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.screen').forEach(q=>q.classList.remove('on'));$(b.dataset.screen).classList.add('on');setTimeout(()=>drawChart($('chart'),rows,chart),30)});window.onresize=()=>drawChart($('chart'),rows,chart);boot();

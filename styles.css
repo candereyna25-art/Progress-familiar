@@ -12,3 +12,21 @@ input,select,textarea{border:1px solid var(--line);padding:12px;background:var(-
 details{margin:10px 0}summary{font-weight:850;color:var(--pri)}textarea{min-height:80px}.entry{padding:12px 0;border-top:1px solid var(--line)}.entry:first-child{border:0}.entry small{display:block;color:var(--muted)}.family-code{text-align:center;font-size:28px;font-weight:900;letter-spacing:.13em;background:var(--soft);padding:14px;border-radius:15px;margin-bottom:10px}.status{padding:10px;background:var(--soft);border-radius:12px;margin-top:10px}.error{background:#fff0ed;color:#a54533}
 nav{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fffffff2;backdrop-filter:blur(18px);border-radius:20px;box-shadow:0 12px 30px #12304425}body.dark nav{background:#232836ee}nav button{background:transparent;color:var(--muted);font-size:12px;padding:9px 3px}nav button.on{background:var(--soft);color:var(--ink)}
 @media(max-width:430px){.hero-card strong{font-size:34px}.ring{width:96px;height:96px}.calc-list{grid-template-columns:1fr 1fr}}
+.history-head h2{margin-bottom:2px}
+.history-filter{width:auto;min-width:132px;margin:0;padding:9px 10px}
+.entry{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.entry-main b{font-size:20px}
+.entry-meta{margin-top:3px}
+.entry-actions{display:flex;gap:7px;align-items:center}
+.entry-actions button{width:auto;padding:8px 10px;font-size:12px;border-radius:10px}
+.entry-actions .edit{background:var(--soft);color:var(--ink)}
+.entry-actions .delete{background:#fff0ed;color:#a54533}
+.entry-details{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:-3px}
+.chip{display:inline-block;background:var(--soft);padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;color:var(--ink)}
+.editing-banner{padding:10px 12px;border-radius:13px;background:#fff0d4;color:#7d5919;font-size:13px;margin-bottom:10px;font-weight:800}
+@media(max-width:430px){
+  .entry{grid-template-columns:1fr}
+  .entry-actions{grid-column:1/-1}
+  .entry-actions button{flex:1}
+  .history-head{align-items:flex-start}
+}

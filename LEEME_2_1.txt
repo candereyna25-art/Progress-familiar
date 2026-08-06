@@ -1,0 +1,19 @@
+WEIGHT TRACKER 2.1 — MEJORA DE HISTORIAL
+
+Mejoras:
+- Historial compacto.
+- Botones pequeños de Editar y Eliminar.
+- Edición completa de un registro existente.
+- Filtros: todos, últimos 7 días, últimos 30 días y registros con medidas.
+- Resumen del número de registros mostrados.
+- Conserva todos los datos actuales.
+- No requiere cambios en Supabase.
+
+SUBIR DESDE IPHONE
+1. Descomprime este ZIP.
+2. Add file > Upload files.
+3. Selecciona todos los archivos sueltos.
+4. Reemplaza los existentes.
+5. Commit changes.
+6. Abre:
+https://candereyna25-art.github.io/Progress-familiar/?v=21
