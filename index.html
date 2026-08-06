@@ -117,6 +117,20 @@
   <button data-screen="settings">Ajustes</button>
 </nav>
 
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js?v=211', { updateViaCache: 'none' });
+      await registration.update();
+    } catch (error) {
+      console.warn('Service worker no disponible:', error);
+    }
+  });
+}
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module" src="main.js"></script>
 </body>

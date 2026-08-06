@@ -1,0 +1,11 @@
+WEIGHT TRACKER 2.1.1 — REPARACIÓN DE SAFARI
+
+El error FetchEvent.respondWith es causado por un Service Worker anterior que quedó guardado en Safari.
+
+SUBE TODOS LOS ARCHIVOS SUELTOS A LA RAÍZ DEL REPOSITORIO.
+Después abre:
+https://candereyna25-art.github.io/Progress-familiar/reset.html?v=211
+
+Pulsa "Reparar y abrir la app".
+
+Tus registros no se borran porque están en Supabase.

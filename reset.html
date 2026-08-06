@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reparar Weight Tracker</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f3f0e8;color:#123044;padding:30px}
+.card{max-width:520px;margin:auto;background:white;border-radius:22px;padding:22px;box-shadow:0 15px 35px #12304422}
+button{width:100%;border:0;border-radius:14px;padding:14px;background:#167d7f;color:white;font-size:17px;font-weight:800}
+#status{margin-top:14px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Reparar Weight Tracker</h1>
+<p>Este botón elimina la caché anterior de la app. Tus registros de Supabase no se borran.</p>
+<button id="repair">Reparar y abrir la app</button>
+<div id="status"></div>
+</div>
+<script>
+document.getElementById('repair').onclick = async () => {
+  const status = document.getElementById('status');
+  status.textContent = 'Limpiando caché…';
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(reg => reg.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(key => caches.delete(key)));
+    }
+    status.textContent = 'Listo. Abriendo…';
+    location.replace('./?v=211');
+  } catch (e) {
+    status.textContent = 'No se pudo limpiar automáticamente. Elimina los datos de github.io desde Ajustes de Safari.';
+  }
+};
+</script>
+</body>
+</html>
